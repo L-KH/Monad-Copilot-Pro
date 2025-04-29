@@ -1,0 +1,78 @@
+{
+  "name": "ERC20 Token Deployment",
+  "description": "Deploy a custom ERC20 token with minting and burning capabilities",
+  "variables": {
+    "tokenName": "Monad Test Token",
+    "tokenSymbol": "MTT",
+    "tokenDecimals": 18,
+    "initialSupply": "1000000000000000000000000",
+    "ownerAddress": "0x0000000000000000000000000000000000000000"
+  },
+  "steps": [
+    {
+      "id": "generate-contract",
+      "name": "Generate Token Contract",
+      "type": "custom",
+      "command": "claude generate-contract 'Create an ERC20 token named {{tokenName}} with symbol {{tokenSymbol}}, {{tokenDecimals}} decimals, and initial supply of {{initialSupply}} tokens. Include minting and burning functions with owner-only access control.'",
+      "description": "Use Claude to generate a Solidity smart contract",
+      "dependencies": [],
+      "extractVariables": {
+        "contractCode": "code"
+      }
+    },
+    {
+      "id": "save-contract",
+      "name": "Save Contract to File",
+      "type": "custom",
+      "command": "save-file Token.sol '{{contractCode}}'",
+      "description": "Save the generated contract to a file",
+      "dependencies": ["generate-contract"]
+    },
+    {
+      "id": "compile",
+      "name": "Compile Token Contract",
+      "type": "compile",
+      "command": "monad compile Token.sol",
+      "description": "Compile the Solidity contract",
+      "dependencies": ["save-contract"],
+      "extractVariables": {
+        "contractAbi": "artifacts.abi",
+        "contractBytecode": "artifacts.bytecode"
+      }
+    },
+    {
+      "id": "deploy",
+      "name": "Deploy Token Contract",
+      "type": "deploy_contract",
+      "command": "monad deploy --contract Token --args '[\"{{tokenName}}\", \"{{tokenSymbol}}\", {{tokenDecimals}}, \"{{initialSupply}}\", \"{{ownerAddress}}\"]'",
+      "description": "Deploy the contract to Monad testnet",
+      "dependencies": ["compile"],
+      "extractVariables": {
+        "contractAddress": "contractAddress",
+        "deployTxHash": "txHash"
+      }
+    },
+    {
+      "id": "verify",
+      "name": "Verify Contract on Explorer",
+      "type": "verify_contract",
+      "command": "monad verify --contract-address {{contractAddress}} --contract Token",
+      "description": "Verify the contract source code on the block explorer",
+      "dependencies": ["deploy"],
+      "extractVariables": {
+        "verificationUrl": "url"
+      }
+    },
+    {
+      "id": "check-balance",
+      "name": "Check Token Balance",
+      "type": "call_contract",
+      "command": "monad call --contract {{contractAddress}} --function \"balanceOf(address)\" --args '[\"{{ownerAddress}}\"]' --read-only",
+      "description": "Check the token balance of the owner",
+      "dependencies": ["verify"],
+      "extractVariables": {
+        "ownerBalance": "result"
+      }
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "name": "NFT Collection Deployment",
+  "description": "Deploy an NFT collection with batch minting and metadata features",
+  "variables": {
+    "collectionName": "Monad NFT Collection",
+    "collectionSymbol": "MNFT",
+    "baseURI": "ipfs://QmYourIPFSHash/",
+    "maxSupply": 10000,
+    "mintPrice": "50000000000000000",
+    "ownerAddress": "0x0000000000000000000000000000000000000000",
+    "royaltyFee": 250,
+    "royaltyRecipient": "0x0000000000000000000000000000000000000000",
+    "mintCount": 5,
+    "mintRecipient": "0x0000000000000000000000000000000000000000"
+  },
+  "steps": [
+    {
+      "id": "generate-contract",
+      "name": "Generate NFT Contract",
+      "type": "custom",
+      "command": "claude generate-contract 'Create an ERC721 NFT collection named {{collectionName}} with symbol {{collectionSymbol}}, maximum supply of {{maxSupply}} tokens, and base URI {{baseURI}}. Include batch minting, metadata URI management, royalty support with {{royaltyFee}} basis points to {{royaltyRecipient}}, and a public mint function with price of {{mintPrice}} wei per token. Optimize for Monad parallel execution.'",
+      "description": "Use Claude to generate a Solidity NFT contract",
+      "dependencies": [],
+      "extractVariables": {
+        "contractCode": "code"
+      }
+    },
+    {
+      "id": "save-contract",
+      "name": "Save Contract to File",
+      "type": "custom",
+      "command": "save-file NFT.sol '{{contractCode}}'",
+      "description": "Save the generated contract to a file",
+      "dependencies": ["generate-contract"]
+    },
+    {
+      "id": "compile",
+      "name": "Compile NFT Contract",
+      "type": "compile",
+      "command": "monad compile NFT.sol",
+      "description": "Compile the Solidity contract",
+      "dependencies": ["save-contract"],
+      "extractVariables": {
+        "contractAbi": "artifacts.abi",
+        "contractBytecode": "artifacts.bytecode"
+      }
+    },
+    {
+      "id": "deploy",
+      "name": "Deploy NFT Contract",
+      "type": "deploy_contract",
+      "command": "monad deploy --contract NFT --args '[\"{{collectionName}}\", \"{{collectionSymbol}}\", \"{{baseURI}}\", {{maxSupply}}, \"{{mintPrice}}\", \"{{ownerAddress}}\", {{royaltyFee}}, \"{{royaltyRecipient}}\"]'",
+      "description": "Deploy the contract to Monad testnet",
+      "dependencies": ["compile"],
+      "extractVariables": {
+        "contractAddress": "contractAddress",
+        "deployTxHash": "txHash"
+      }
+    },
+    {
+      "id": "verify",
+      "name": "Verify Contract on Explorer",
+      "type": "verify_contract",
+      "command": "monad verify --contract-address {{contractAddress}} --contract NFT",
+      "description": "Verify the contract source code on the block explorer",
+      "dependencies": ["deploy"],
+      "extractVariables": {
+        "verificationUrl": "url"
+      }
+    },
+    {
+      "id": "mint-batch",
+      "name": "Mint Batch of NFTs",
+      "type": "call_contract",
+      "command": "monad call --contract {{contractAddress}} --function \"mintBatch(address,uint256)\" --args '[\"{{mintRecipient}}\", {{mintCount}}]'",
+      "description": "Mint a batch of NFTs to the specified address",
+      "dependencies": ["verify"],
+      "extractVariables": {
+        "mintTxHash": "txHash"
+      }
+    },
+    {
+      "id": "check-balance",
+      "name": "Check NFT Balance",
+      "type": "call_contract",
+      "command": "monad call --contract {{contractAddress}} --function \"balanceOf(address)\" --args '[\"{{mintRecipient}}\"]' --read-only",
+      "description": "Check the NFT balance of the recipient",
+      "dependencies": ["mint-batch"],
+      "extractVariables": {
+        "recipientBalance": "result"
+      }
+    },
+    {
+      "id": "check-token-uri",
+      "name": "Check Token URI",
+      "type": "call_contract",
+      "command": "monad call --contract {{contractAddress}} --function \"tokenURI(uint256)\" --args '[1]' --read-only",
+      "description": "Check the token URI of the first minted NFT",
+      "dependencies": ["mint-batch"],
+      "extractVariables": {
+        "tokenURI": "result"
+      }
+    }
+  ]
+}

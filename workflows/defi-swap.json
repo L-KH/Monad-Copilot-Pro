@@ -1,0 +1,104 @@
+{
+  "name": "DeFi Token Swap",
+  "description": "Execute a token swap on a decentralized exchange with automated gas optimization",
+  "variables": {
+    "sourceTokenAddress": "0x0000000000000000000000000000000000000000",
+    "targetTokenAddress": "0x0000000000000000000000000000000000000000",
+    "routerAddress": "0x0000000000000000000000000000000000000000",
+    "swapAmount": "1000000000000000000",
+    "minAmountOut": "0",
+    "slippageTolerance": "0.5",
+    "deadline": "1800",
+    "walletAddress": "0x0000000000000000000000000000000000000000"
+  },
+  "steps": [
+    {
+      "id": "get-token-details-source",
+      "name": "Get Source Token Details",
+      "type": "call_contract",
+      "command": "monad call --contract {{sourceTokenAddress}} --function \"symbol()\" --read-only",
+      "description": "Get the symbol of the source token",
+      "dependencies": [],
+      "extractVariables": {
+        "sourceTokenSymbol": "result"
+      }
+    },
+    {
+      "id": "get-token-details-target",
+      "name": "Get Target Token Details",
+      "type": "call_contract",
+      "command": "monad call --contract {{targetTokenAddress}} --function \"symbol()\" --read-only",
+      "description": "Get the symbol of the target token",
+      "dependencies": [],
+      "extractVariables": {
+        "targetTokenSymbol": "result"
+      }
+    },
+    {
+      "id": "estimate-gas-price",
+      "name": "Estimate Gas Price",
+      "type": "custom",
+      "command": "monad gas --estimate",
+      "description": "Get the current gas price estimation",
+      "dependencies": [],
+      "extractVariables": {
+        "gasPrice": "standard"
+      }
+    },
+    {
+      "id": "calculate-min-amount",
+      "name": "Calculate Minimum Amount Out",
+      "type": "custom",
+      "command": "calculate '{{swapAmount}}' - ('{{swapAmount}}' * {{slippageTolerance}} / 100)",
+      "description": "Calculate minimum amount out based on slippage tolerance",
+      "dependencies": [],
+      "extractVariables": {
+        "calculatedMinAmountOut": "result"
+      }
+    },
+    {
+      "id": "approve-token-spending",
+      "name": "Approve Token Spending",
+      "type": "approve",
+      "command": "monad call --contract {{sourceTokenAddress}} --function \"approve(address,uint256)\" --args '[\"{{routerAddress}}\", \"{{swapAmount}}\"]'",
+      "description": "Approve the router to spend tokens",
+      "dependencies": ["get-token-details-source", "get-token-details-target", "estimate-gas-price"],
+      "extractVariables": {
+        "approveTxHash": "txHash"
+      }
+    },
+    {
+      "id": "execute-swap",
+      "name": "Execute Token Swap",
+      "type": "call_contract",
+      "command": "monad call --contract {{routerAddress}} --function \"swapExactTokensForTokens(uint256,uint256,address[],address,uint256)\" --args '[\"{{swapAmount}}\", \"{{calculatedMinAmountOut}}\", [\"{{sourceTokenAddress}}\", \"{{targetTokenAddress}}\"], \"{{walletAddress}}\", \"{{deadline}}\"]' --gas-price {{gasPrice}}",
+      "description": "Execute the swap transaction",
+      "dependencies": ["approve-token-spending", "calculate-min-amount"],
+      "extractVariables": {
+        "swapTxHash": "txHash"
+      }
+    },
+    {
+      "id": "verify-balance",
+      "name": "Verify Target Token Balance",
+      "type": "call_contract",
+      "command": "monad call --contract {{targetTokenAddress}} --function \"balanceOf(address)\" --args '[\"{{walletAddress}}\"]' --read-only",
+      "description": "Check the balance of target tokens after the swap",
+      "dependencies": ["execute-swap"],
+      "extractVariables": {
+        "newBalance": "result"
+      }
+    },
+    {
+      "id": "generate-report",
+      "name": "Generate Swap Report",
+      "type": "custom",
+      "command": "generate-report 'Swapped {{swapAmount}} {{sourceTokenSymbol}} for {{newBalance}} {{targetTokenSymbol}}' --tx-hash {{swapTxHash}}",
+      "description": "Generate a report of the swap operation",
+      "dependencies": ["verify-balance"],
+      "extractVariables": {
+        "reportUrl": "url"
+      }
+    }
+  ]
+}

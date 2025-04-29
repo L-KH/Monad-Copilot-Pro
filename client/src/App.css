@@ -1,0 +1,201 @@
+/* Notification animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.app-logo {
+  height: 40px;
+}
+
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom animation for workflow execution */
+.workflow-step {
+  transition: all 0.3s ease-in-out;
+}
+
+.workflow-step-pending {
+  opacity: 0.6;
+}
+
+.workflow-step-running {
+  opacity: 1;
+  animation: pulse 1.5s infinite;
+}
+
+.workflow-step-successful {
+  opacity: 1;
+  background-color: rgba(52, 211, 153, 0.1);
+}
+
+.workflow-step-failed {
+  opacity: 1;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Code editor styling */
+.monaco-editor {
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+/* Terminal-like output */
+.terminal-output {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.terminal-output .success {
+  color: #34d399;
+}
+
+.terminal-output .error {
+  color: #ef4444;
+}
+
+.terminal-output .warning {
+  color: #f59e0b;
+}
+
+.terminal-output .info {
+  color: #3b82f6;
+}
+
+/* Blockchain address display */
+.blockchain-address {
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  /* Ensure sidebar text doesn't get cut off on smaller screens */
+  .sidebar-responsive {
+    width: 100% !important;
+    max-width: 280px;
+  }
+  
+  /* Improve text display in sidebar on mobile */
+  .sidebar-responsive span,
+  .sidebar-responsive p {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+}
+
+/* Prevent content overflow */
+.overflow-prevent {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+/* Apply text wrapping to all text elements */
+.text-wrap {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Auto break long text */
+p, h1, h2, h3, h4, h5, h6, span, div {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Sidebar responsive behavior */
+.sidebar-responsive {
+  transition: width 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Improve text wrapping in sidebar */
+.text-wrap {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-all;
+  hyphens: auto;
+  white-space: normal;
+}
+
+/* Ensure tables don't overflow */
+table {
+  max-width: 100%;
+  display: table;
+  table-layout: fixed;
+}
+
+/* Responsive tables */
+@media (max-width: 768px) {
+  .responsive-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  td, th {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Ensure chart containers don't overflow */
+.recharts-wrapper,
+.recharts-surface {
+  max-width: 100%;
+}

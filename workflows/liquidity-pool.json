@@ -1,0 +1,84 @@
+{
+  "name": "Create Liquidity Pool",
+  "description": "Create a DEX liquidity pool for a token pair and add initial liquidity",
+  "variables": {
+    "tokenAddress": "0x0000000000000000000000000000000000000000",
+    "routerAddress": "0x0000000000000000000000000000000000000001",
+    "factoryAddress": "0x0000000000000000000000000000000000000002",
+    "wethAddress": "0x0000000000000000000000000000000000000003",
+    "tokenAmount": "1000000000000000000000",
+    "ethAmount": "10000000000000000000",
+    "slippageTolerance": "50",
+    "deadline": "1800",
+    "ownerAddress": "0x0000000000000000000000000000000000000000"
+  },
+  "steps": [
+    {
+      "id": "approve-token",
+      "name": "Approve Token Transfer",
+      "type": "call_contract",
+      "command": "monad call --contract {{tokenAddress}} --function \"approve(address,uint256)\" --args '[\"{{routerAddress}}\", \"{{tokenAmount}}\"]'",
+      "description": "Approve router to spend tokens",
+      "dependencies": [],
+      "extractVariables": {
+        "approveTxHash": "txHash"
+      }
+    },
+    {
+      "id": "verify-allowance",
+      "name": "Verify Allowance",
+      "type": "call_contract",
+      "command": "monad call --contract {{tokenAddress}} --function \"allowance(address,address)\" --args '[\"{{ownerAddress}}\", \"{{routerAddress}}\"]' --read-only",
+      "description": "Verify that the router has sufficient allowance",
+      "dependencies": ["approve-token"],
+      "extractVariables": {
+        "allowance": "result"
+      }
+    },
+    {
+      "id": "check-pair-exists",
+      "name": "Check if Pair Exists",
+      "type": "call_contract",
+      "command": "monad call --contract {{factoryAddress}} --function \"getPair(address,address)\" --args '[\"{{tokenAddress}}\", \"{{wethAddress}}\"]' --read-only",
+      "description": "Check if pair already exists in the factory",
+      "dependencies": ["verify-allowance"],
+      "extractVariables": {
+        "pairAddress": "result"
+      }
+    },
+    {
+      "id": "add-liquidity",
+      "name": "Add Liquidity",
+      "type": "call_contract",
+      "command": "monad call --contract {{routerAddress}} --function \"addLiquidityETH(address,uint256,uint256,uint256,address,uint256)\" --args '[\"{{tokenAddress}}\", \"{{tokenAmount}}\", \"{{minTokenAmount}}\", \"{{minEthAmount}}\", \"{{ownerAddress}}\", \"{{deadline}}\"]' --value \"{{ethAmount}}\"",
+      "description": "Add liquidity to the pool",
+      "dependencies": ["check-pair-exists"],
+      "extractVariables": {
+        "addLiquidityTxHash": "txHash",
+        "lpTokenAmount": "result.amountOut"
+      }
+    },
+    {
+      "id": "get-pair-address",
+      "name": "Get LP Token Address",
+      "type": "call_contract",
+      "command": "monad call --contract {{factoryAddress}} --function \"getPair(address,address)\" --args '[\"{{tokenAddress}}\", \"{{wethAddress}}\"]' --read-only",
+      "description": "Get the address of the LP token",
+      "dependencies": ["add-liquidity"],
+      "extractVariables": {
+        "lpTokenAddress": "result"
+      }
+    },
+    {
+      "id": "check-lp-balance",
+      "name": "Check LP Token Balance",
+      "type": "call_contract",
+      "command": "monad call --contract {{lpTokenAddress}} --function \"balanceOf(address)\" --args '[\"{{ownerAddress}}\"]' --read-only",
+      "description": "Check the LP token balance of the owner",
+      "dependencies": ["get-pair-address"],
+      "extractVariables": {
+        "lpBalance": "result"
+      }
+    }
+  ]
+}

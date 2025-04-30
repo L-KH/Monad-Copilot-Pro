@@ -25,8 +25,6 @@ import { SocketProvider } from './services/SocketContext';
 // API service
 import { checkApiStatus } from './services/api';
 
-import './App.css';
-
 function App() {
   const [loading, setLoading] = useState(true);
   const [apiConnected, setApiConnected] = useState(false);

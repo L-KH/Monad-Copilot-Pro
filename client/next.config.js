@@ -16,6 +16,25 @@ const nextConfig = {
   },
   // Ensure compatibility with Vercel deployment
   webpack: (config) => {
+    // Add support for CSS files
+    const oneOfRule = config.module.rules.find((rule) => rule.oneOf);
+    
+    if (oneOfRule) {
+      const moduleCssRule = oneOfRule.oneOf.find((rule) => 
+        rule.test && rule.test.toString().includes('module\\.(css|scss|sass)')  
+      );
+      
+      if (moduleCssRule) {
+        moduleCssRule.test = /\.module\.(css|scss|sass)$/;
+      }
+
+      // Ensure CSS is loaded properly
+      oneOfRule.oneOf.push({
+        test: /\.(css|scss|sass)$/,
+        use: ['style-loader', 'css-loader']
+      });
+    }
+    
     return config;
   },
   // Ensure proper environment variable handling

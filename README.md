@@ -3,6 +3,9 @@
 ## 🚀 Overview
 Monad Copilot Pro is an AI-powered development assistant for the Monad blockchain ecosystem, combining Claude AI integration with Monad blockchain tools to streamline smart contract development, deployment, and analysis.
 
+## 🎥 Video Tutorial
+[![Monad Copilot Pro Demo](https://img.youtube.com/vi/YBH4OtTEVEk/0.jpg)](https://youtu.be/YBH4OtTEVEk)
+
 ## ✨ Features
 - **AI-Powered Development**: Claude AI integration for code generation, analysis, and optimization
 - **Blockchain Integration**: Full support for Monad testnet and devnet operations

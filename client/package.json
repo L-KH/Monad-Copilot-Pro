@@ -33,13 +33,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "next dev",
-    "next-dev": "next dev",
-    "next-build": "next build",
-    "next-start": "next start",
-    "vercel-build": "next build",
-    "vercel-dev": "next dev",
-    "local-deploy": "npm install && next build"
+    "dev": "react-scripts start",
+    "vercel-build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [

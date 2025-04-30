@@ -2,7 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: 'export',
+  // Changed from 'export' to prevent routes-manifest issue
+  output: 'standalone',
   distDir: 'build',
   // Ensure the React app works without server-side rendering
   trailingSlash: true,
@@ -34,6 +35,15 @@ const nextConfig = {
         use: ['style-loader', 'css-loader']
       });
     }
+    
+    // Add fallbacks for react-syntax-highlighter
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'react-syntax-highlighter/dist/esm/styles/hljs/a11y-dark': 
+        require.resolve('react-syntax-highlighter/dist/cjs/styles/hljs/a11y-dark'),
+      'react-syntax-highlighter/dist/esm/': 
+        require.resolve('react-syntax-highlighter').replace('/index.js', '/') 
+    };
     
     return config;
   },

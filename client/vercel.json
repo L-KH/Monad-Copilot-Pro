@@ -3,7 +3,7 @@
   "buildCommand": "npm run vercel-build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "outputDirectory": "build",
+  "output": "standalone",
   "rewrites": [
     {
       "source": "/(.*)",

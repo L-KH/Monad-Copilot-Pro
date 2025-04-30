@@ -14,8 +14,11 @@ import {
   BeakerIcon
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+// import SyntaxHighlighter from 'react-syntax-highlighter';
+// import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+// Using compatible imports
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/cjs/prism';
+import { vs2015 } from '../utils/highlighterStyles';
 import { toast } from 'react-toastify';
 
 // Components
